@@ -1,28 +1,46 @@
 (function($){
 	var host = this,
 
-		/*
-		 * WebSlide Class constructor. Main class of Webppt
-		 * 
-		 */
-		WebSlide = function(dom){
-			this.wrap = dom;
-			this.pages = [];
+	/*
+	 * WebSlide Class constructor. Main class of Webppt
+	 * 
+	 */
+	WebSlide = function(dom){
+		this.wrap = dom;
+		this.pages = [];
+		
+		this.status = false;
+		this.index = 0;
 
-			this.status = false;
-			this.index = 0;
-
-			// get page width and height
-			var w = $(host);
-			this.pageWidth = w.width();
-			this.pageHeight = w.height();
-
-			this.constructor.supclass.call(this);
+		// get page width and height
+		var w = $(host);
+		this.pageWidth = w.width();
+		this.pageHeight = w.height();
+		this.pageMargin = 40;
+		this.pageStartCss = {
+			margin: 0,
+			height: this.pageHeight + "px"
 		};
+		this.pageStopCss = {
+			margin: this.pageMargin + "px",
+			height: this.pageHeight - this.pageMargin*2 + "px"
+		};
+
+		this.constructor.supclass.call(this);
+	};
 	// every page has its own event
 	//
 	$.extendClass(WebSlide , $.Observable ,{
-
+		events:[
+			// 开始之前触事件
+			"beforestart",
+			// 开始之后触事件
+			"afterstart",
+			// 结束之前触事件
+			"beforestop",
+			// 结束之后触事件
+			"afterstop"
+		],
 		initialize: function(){
 			var that = this;
 			this.wrap.css({
@@ -30,9 +48,7 @@
 				overflowY:"auto"
 			}).children().each(function(i,dom){
 				that.pages.push(new Page(dom , that));
-			}).css({
-				height: this.pageHeight + "px"
-			});
+			}).css(this.pageStopCss);
 			this.initEvents();
 		},
 
@@ -48,6 +64,7 @@
 
 			// 'esc' keyevent, 'right','left','up','down' keyevent
 			$(document).keyup(function(event){
+				if(!that.status) return;
 				switch(event.keyCode){
 
 					case 27: // 'esc'
@@ -64,6 +81,17 @@
 						that.prev();
 						break;
 				}
+			});
+
+			// when befor the ppt start , we need to resize pages
+			this.addListener("beforestart",function(slide){
+				slide.wrap.children().css(slide.pageStartCss);
+			});
+			// when after the ppt stop, we need to resize pages too.
+			this.addListener("afterend",function(slide){
+				// set scroll top value to avoid change
+				slide.wrap.scrollTop(slide.index * slide.pageHeight - slide.index*this.pageMargin);
+				slide.wrap.children().css(slide.pageStopCss);
 			});
 		},
 		/*
@@ -97,13 +125,14 @@
 		/*
 		 * go to the page, leave current page and enter the page. This will execute
 		 * needed steps to enter the page
+		 * @parame index {Num} go to the current page index step
 		 */
-		goPage: function(num){
+		goPage: function(num,index){
 			var lastpage = this.pages[this.index];
 			lastpage.end();
 			this.index = num;
 			var currpage = this.pages[this.index];
-			currpage.start();
+			currpage.start(index || -1);
 		},
 
 		/*
@@ -114,20 +143,22 @@
 			if(this.index == 0){
 				return false;
 			}
-			var currPage = this.pages[this.index];
-			this.goPage(this.index-1);
+			var prevPage = this.pages[this.index-1];
+			this.goPage(this.index-1,prevPage.steps.length-1);
 		},
 
 		/*
 		 * begin to show ppt form num, hide all the page and then show current page
 		 */
 		start: function(num){
+			if(this.fireEvent("beforestart",this) === false) return;
 			this.status = true;
 			// hide all the pages
 			$.each(this.pages,function(i,page){
 				page.hide();
 			});
 			this.goPage(num);
+			if(this.fireEvent("afterstart",this) === false) return;
 		},
 
 		/*
@@ -136,6 +167,7 @@
 		 * to top, we need to set the scroll top value.
 		 */
 		stop: function(){
+			if(this.fireEvent("beforeend",this) === false) return;
 			this.status = false;
 			
 			$.each(this.pages,function(i, page){
@@ -147,8 +179,8 @@
 					step.setToTargetStatus();
 				});
 			});
-			// set scroll top value to avoid change
-			this.wrap.scrollTop(this.index * this.pageHeight);
+
+			if(this.fireEvent("afterend",this) === false) return;
 		}
 	});
 	 
@@ -177,17 +209,23 @@
 			var that = this;
 
 			$(this.dom).addClass(this.className).css({position:'relative'});
-			this.addListener("enterPage",function(page){
-				this.stepIndex = -1;
+			this.addListener("enterPage",function(page , index){
+				this.stepIndex = index;
 				console.log("enter page :" + that.webslide.index);
 				page.show();
 				//reset all the step
 				// set all these obj to target status
 				$.each(page.steps,function(i,steps){
 					// set orign status
-					$.each(steps,function(i,step){
-						step.reset();
-					});
+					if(i <= index){
+						$.each(steps,function(i,step){
+							//step.end();
+						});
+					}else{
+						$.each(steps,function(i,step){
+							step.reset();
+						});
+					}
 				});
 			});
 			// what would id do , when leave page
@@ -223,6 +261,7 @@
 				}else{ // aready started
 					alert("aready started!");
 				}
+				return false;
 			});
 		},
 		events: [
@@ -343,8 +382,8 @@
 			});
 			return true;
 		},
-		start: function(){
-			this.fireEvent("enterPage",this);
+		start: function(index){
+			this.fireEvent("enterPage",this,index);
 		},
 		
 		end: function(){
@@ -422,9 +461,35 @@
 			this.isEnd = false;
 		},
 		setToTargetStatus: function(){
+			this.isEnd = true;
 			this.obj.css(this.target);
 		}
 	});
 	// export
 	host.WebSlide = WebSlide;
 })(jQuery);
+
+/* log 2011/8/2
+ 1.缺少统一控制功能，每一个页面都需要给相关的元素添加相关功能，有些重复。
+	改进：可以统一给所有页面都添加相关的控制，例如：可以通过查看当前页面是否有需要执行动画的元素
+
+ 2.给页面切换添加动画特效，例如左右浮动，需要考虑特效的耦合方式。尽量减少耦合，达到可以轻松变换特效。
+
+
+ 3.可以添加动画组合函数，StepGroup  XXX
+
+ 4.需要有提示信息，例如提示：双击，开始播放ppt，各种快捷键等
+
+ 5.在演示的时候需要让作者知道目前是第几页
+
+ 6.做好全局查看模式
+
+ 7.模板扩展思路
+
+ 8.画笔
+
+ 9.文字自适应大小
+
+ 10.======》 可视化编辑
+
+*/
