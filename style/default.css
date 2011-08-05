@@ -1,0 +1,153 @@
+html{
+	overflow:hidden;
+}
+body{
+	padding:0;
+	margin:0;
+	overflow:hidden;
+	color:white;
+	font-size:32px;
+	font-family:'Helvetica Neue', Helvetica, sans-serif;
+	overflow:hidden;
+}
+ul,li,h1,h2,h3,h4,h5,h6{
+	padding:0;
+	margin:0;
+}
+
+h1,h2,.text-shadow{
+	text-shadow: 2px 2px 3px white;
+}
+h1,h2{
+	color:black;
+	background:rgba(0,0,0,0.5);
+}
+h1{
+	text-align:center;
+	font-size:60px;
+	margin:100px auto;
+	height:150px;
+	line-height:150px;
+}
+h2{
+	height:100px;
+	font-size:40px;
+	line-height:100px;
+	padding:0 100px;
+}
+.webslide>div{
+	overflow:hidden;
+	background:gray;
+	position:relative;
+	box-shadow:3px 3px 10px black;
+}
+section{
+	padding:0 100px;
+}
+footer{
+	height:50px;
+	font-size:20px;
+	line-height:50px;
+	padding-left:20px;
+	background:black;
+	position:absolute;
+	bottom:0;
+	right:0;
+	left:0;
+	opacity:0.3;
+}
+
+
+/*
+ * slide help
+ */
+ .webslide-help{
+	font-size:16px;
+	position:absolute;
+	left:-350px;
+	top:0px;
+	background:black;
+	width:300px;
+	border-top-right-radius:30px;
+	border-bottom-right-radius:30px;
+	box-shadow:4px 4px 6px gray; 
+}
+.webslide-help dl{
+	line-height:30px;
+}
+.webslide-help dl dt{
+	height:30px;
+	margin:0 10px;
+	text-align:center;
+	font-size:20px;
+	color:gray;
+	background:black;
+	border-bottom:1px solid gray;
+	border-radius:10px;
+	box-shadow:0px 2px 3px gray;
+}
+.webslide-help dl dd{
+	margin-left:20px;
+	line-height:50px;
+}
+.webslide-help dl dd em{
+	color:black;
+	background:white;
+	margin-right:10px;
+	padding:4px;
+	border-radius:10px;
+	box-shadow:2px 2px 3px gray;
+}
+
+/*
+ *webslide-control
+ */
+.webslide-control{
+	background:white;
+	position:absolute;
+	bottom:-100px;
+	left:20px;
+	opacity:0.3;
+	width:184px;
+	height:60px;
+	margin:0;
+	overflow:hidden;
+	border-radius:6px;
+}
+.webslide-control dd{
+	width:48px;
+	height:48px;
+	float:left;
+	margin:4px 4px;
+	border:2px solid white;
+	background-image:url("images/p-left.gif");
+	border-radius:6px;
+}
+.webslide-control dd:hover{
+	background-position:-1px -1px;
+	border:2px solid black;
+	box-shadow:2px 3px 3px #333;
+}
+.webslide-control dd:active{
+	margin:5px 3px 3px 5px;
+	border:2px solid black;
+	box-shadow:1px 2px 2px #333;
+}
+.webslide-control .p-pen{
+	background:url("images/p-pen.gif");
+}
+.webslide-control .p-right{
+	background:url("images/p-right.gif");
+}
+
+/*
+ * 画板 
+ */
+.webslide-draw{
+	cursor:url("images/pen.cur"),url("images/pen.ani"),pointer;
+	position:absolute;
+	top:0;
+	left:0;
+	z-index: 1000;
+	background: rgba(0,0,0,0.2);
+}
