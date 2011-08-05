@@ -1,11 +1,68 @@
 (function($){
 	var host = this,
+		// canvas draw class
+		// help to draw line on mask canvas
+		CanvasDraw = function(dom){
+			this.canvas = dom;
+			this.context = dom.getContext("2d");
+			this.constructor.supclass.call(this);
+		};
 
+	$.extendClass(CanvasDraw , $.Observable, {
+		initialize: function(){
+			this.width = this.canvas.width;
+			this.height = this.canvas.height;
+			this.context.lineCap = "round";
+			this.context.lineJoin = "round";
+			this.setStyle(); 
+			// get pos
+			var offset = $(this.canvas).offset();
+			this.x = offset.left;
+			this.y = offset.top;
+			this.initEvent();
+		},
+		fillStyle: "black",
+		strokeStyle: "red",
+		setStyle: function(fillStyle,strokeStyle){
+			var ctx = this.context;
+			ctx.fillStyle = this.fillStyle = fillStyle || this.fillStyle;
+			ctx.strokeStyle = this.strokeStyle = strokeStyle || this.strokeStyle;
+		},
+		initEvent: function(){
+			var me = this , 
+				mousemoveFn = function(ev){
+					me.drawPointer(ev.clientX,ev.clientY);
+					return false;
+				};
+			
+			$(this.canvas).mousedown(function(ev){
+				me.context.moveTo(ev.clientX,ev.clientY);
+				me.context.beginPath();
+				$(this).mousemove(mousemoveFn);
+				return false;
+			});
+			
+			$(this.canvas).mouseup(function(ev){
+				me.context.closePath();
+				$(this).unbind("mousemove",mousemoveFn);
+			});
+		},
+		drawPointer: function(x, y){
+			var ctx = this.context;
+			ctx.lineTo(x - this.x, y - this.y);
+			ctx.stroke();
+		},
+		clear: function(){
+			this.context.clearRect(0,0,this.width,this.height);
+		}
+	});
+			
+			
 	/*
 	 * WebSlide Class constructor. Main class of Webppt
 	 * 
 	 */
-	WebSlide = function(dom){
+	var WebSlide = function(dom){
 		this.wrap = dom;
 		this.pages = [];
 		
@@ -18,11 +75,15 @@
 		this.pageHeight = w.height();
 		this.pageMargin = 40;
 		this.pageStartCss = {
+			left: 0,
+			right: 0,
 			margin: 0,
+			position: "absolute",
 			height: this.pageHeight + "px"
 		};
 		this.pageStopCss = {
 			margin: this.pageMargin + "px",
+			position:"relative",
 			height: this.pageHeight - this.pageMargin*2 + "px"
 		};
 
@@ -32,24 +93,29 @@
 	//
 	$.extendClass(WebSlide , $.Observable ,{
 		events:[
-			// ¿ªÊ¼Ö®Ç°´¥ÊÂ¼ş
+			// å¼€å§‹ä¹‹å‰è§¦äº‹ä»¶
 			"beforestart",
-			// ¿ªÊ¼Ö®ºó´¥ÊÂ¼ş
+			// å¼€å§‹ä¹‹åè§¦äº‹ä»¶
 			"afterstart",
-			// ½áÊøÖ®Ç°´¥ÊÂ¼ş
+			// ç»“æŸä¹‹å‰è§¦äº‹ä»¶
 			"beforestop",
-			// ½áÊøÖ®ºó´¥ÊÂ¼ş
-			"afterstop"
+			// ç»“æŸä¹‹åè§¦äº‹ä»¶
+			"afterstop",
+			// åˆå§‹åŒ–æ•´ä¸ªé¡µé¢
+			"initialize"
 		],
 		initialize: function(){
 			var that = this;
+			// set origin style
 			this.wrap.css({
 				height: this.pageHeight + "px",
 				overflowY:"auto"
 			}).children().each(function(i,dom){
 				that.pages.push(new Page(dom , that));
 			}).css(this.pageStopCss);
+			// events
 			this.initEvents();
+			this.fireEvent("initialize",this);
 		},
 
 		initEvents: function(){
@@ -79,7 +145,7 @@
 					case 38: // 'up'
 					case 37: // 'left'
 						that.prev();
-						break;
+						break; 
 				}
 			});
 
@@ -90,8 +156,99 @@
 			// when after the ppt stop, we need to resize pages too.
 			this.addListener("afterend",function(slide){
 				// set scroll top value to avoid change
-				slide.wrap.scrollTop(slide.index * slide.pageHeight - slide.index*this.pageMargin);
 				slide.wrap.children().css(slide.pageStopCss);
+				slide.wrap.scrollTop(slide.index * slide.pageHeight - slide.index*this.pageMargin);
+			});
+
+			// for initialize for others
+			// e.g add info dom, tab dom ,here we init help board
+			this.addListener("initialize",function(slide){
+				var innerHTML = '<dl><dt>help</dt><dd><em>dblclick</em><span>to start slide show</span></dd><dd><em>mousewheel</em><span>to move around</span></dd><dd><em>â†’</em><em>â†“</em><em>â†</em><em>â†‘</em><span>to move around</span></dd><dd><em>Esc</em><span>to stop slide show</span></dd><dd><em>h</em><span>to toggle help board</span></dd></dl>';
+				that.helpBoardClass = "webslide-help";
+				var board = that.helpBoard = $("<div></div>");
+				board.html(innerHTML).appendTo(document.body).addClass(that.helpBoardClass).height(that.pageHeight);
+				board.show = false;
+				var orignLeft = board.offset().left;
+				$(document).keyup(function(event){
+					switch(event.keyCode){
+						case 72: //"h"	
+							board.stop(true,false);
+							board.animate({left:!board.show?0:orignLeft+"px"},400,"swing");
+							board.show = !board.show;
+							break;
+					}
+				});
+			});
+
+			// reset pages
+			this.addListener("initialize",function(slide){
+				$(window).resize(function(){
+					slide.resize();
+				});
+			});
+			
+			// show control board
+			this.addListener("initialize",function(slide){
+				var innerHTML = '<dt></dt><dd class="p-left"></dd><dd class="p-pen"></dd><dd class="p-right"></dd>';
+				var board = that.controlBoard = $("<dl></dl>");
+				that.controlBoardClass = "webslide-control";
+				board.html(innerHTML).appendTo(document.body).addClass(that.controlBoardClass);
+				board.show = false;
+				
+				var orignBottom = 20;
+				$(document).keyup(function(event){
+					switch(event.keyCode){
+						case 67: //"c"	
+							board.stop(true,false);
+							board.animate({bottom:board.show?"-100px":orignBottom+"px"},400,"swing");
+							board.show = !board.show;
+							break;
+					}
+				});
+				// to left
+				board.find(".p-left").click(function(event){
+					that.prev();
+				});
+				// to right
+				board.find(".p-right").click(function(event){
+					that.next();
+				});
+
+				// to use pen draw 
+				board.find(".p-pen").click(function(event){
+					if(!that.drawCanvas){
+						that.drawCanvas = $("<canvas class='webslide-draw'></canvas>").appendTo(document.body)
+							.attr("width",that.pageWidth)
+							.attr("height",that.pageHeight).click(function(e){
+								return false;
+							}).bind("contextmenu",function(e){
+								$(this).hide();
+								cd.clear();
+								return false;
+							});
+						// draw event bind
+						var cd = new CanvasDraw(that.drawCanvas[0]);
+					}
+					that.drawCanvas.show();
+				});
+			});
+		},
+		resize: function(){
+			// use css3 scale
+			/*
+			this.wrap.children().css({
+				"-webkit-transform-origin": "top center",
+				"-webkit-transform": "scale("+$(window).height()/this.pageHeight1+")"
+			});
+			*/
+			this.pageHeight = $(window).height();
+			this.pageWidth = $(window).width();
+			// reset start and stop status
+			this.pageStartCss.height = this.pageHeight+"px";
+			this.pageStopCss.height = this.pageHeight - this.pageMargin*2 + "px";
+
+			this.wrap.css({height:this.pageHeight+"px"}).children().css({
+				height: this[this.status?"pageStartCss":"pageStopCss"].height
 			});
 		},
 		/*
@@ -470,26 +627,36 @@
 })(jQuery);
 
 /* log 2011/8/2
- 1.È±ÉÙÍ³Ò»¿ØÖÆ¹¦ÄÜ£¬Ã¿Ò»¸öÒ³Ãæ¶¼ĞèÒª¸øÏà¹ØµÄÔªËØÌí¼ÓÏà¹Ø¹¦ÄÜ£¬ÓĞĞ©ÖØ¸´¡£
-	¸Ä½ø£º¿ÉÒÔÍ³Ò»¸øËùÓĞÒ³Ãæ¶¼Ìí¼ÓÏà¹ØµÄ¿ØÖÆ£¬ÀıÈç£º¿ÉÒÔÍ¨¹ı²é¿´µ±Ç°Ò³ÃæÊÇ·ñÓĞĞèÒªÖ´ĞĞ¶¯»­µÄÔªËØ
+ 1.ç¼ºå°‘ç»Ÿä¸€æ§åˆ¶åŠŸèƒ½ï¼Œæ¯ä¸€ä¸ªé¡µé¢éƒ½éœ€è¦ç»™ç›¸å…³çš„å…ƒç´ æ·»åŠ ç›¸å…³åŠŸèƒ½ï¼Œæœ‰äº›é‡å¤ã€‚
+	æ”¹è¿›ï¼šå¯ä»¥ç»Ÿä¸€ç»™æ‰€æœ‰é¡µé¢éƒ½æ·»åŠ ç›¸å…³çš„æ§åˆ¶ï¼Œä¾‹å¦‚ï¼šå¯ä»¥é€šè¿‡æŸ¥çœ‹å½“å‰é¡µé¢æ˜¯å¦æœ‰éœ€è¦æ‰§è¡ŒåŠ¨ç”»çš„å…ƒç´ 
 
- 2.¸øÒ³ÃæÇĞ»»Ìí¼Ó¶¯»­ÌØĞ§£¬ÀıÈç×óÓÒ¸¡¶¯£¬ĞèÒª¿¼ÂÇÌØĞ§µÄñîºÏ·½Ê½¡£¾¡Á¿¼õÉÙñîºÏ£¬´ïµ½¿ÉÒÔÇáËÉ±ä»»ÌØĞ§¡£
+ 2.ç»™é¡µé¢åˆ‡æ¢æ·»åŠ åŠ¨ç”»ç‰¹æ•ˆï¼Œä¾‹å¦‚å·¦å³æµ®åŠ¨ï¼Œéœ€è¦è€ƒè™‘ç‰¹æ•ˆçš„è€¦åˆæ–¹å¼ã€‚å°½é‡å‡å°‘è€¦åˆï¼Œè¾¾åˆ°å¯ä»¥è½»æ¾å˜æ¢ç‰¹æ•ˆã€‚
 
 
- 3.¿ÉÒÔÌí¼Ó¶¯»­×éºÏº¯Êı£¬StepGroup  XXX
+ 3.å¯ä»¥æ·»åŠ åŠ¨ç”»ç»„åˆå‡½æ•°ï¼ŒStepGroup  XXX
 
- 4.ĞèÒªÓĞÌáÊ¾ĞÅÏ¢£¬ÀıÈçÌáÊ¾£ºË«»÷£¬¿ªÊ¼²¥·Åppt£¬¸÷ÖÖ¿ì½İ¼üµÈ
+ 4.==éœ€è¦æœ‰æç¤ºä¿¡æ¯ï¼Œä¾‹å¦‚æç¤ºï¼šåŒå‡»ï¼Œå¼€å§‹æ’­æ”¾pptï¼Œå„ç§å¿«æ·é”®ç­‰
 
- 5.ÔÚÑİÊ¾µÄÊ±ºòĞèÒªÈÃ×÷ÕßÖªµÀÄ¿Ç°ÊÇµÚ¼¸Ò³
+ 5.åœ¨æ¼”ç¤ºçš„æ—¶å€™éœ€è¦è®©ä½œè€…çŸ¥é“ç›®å‰æ˜¯ç¬¬å‡ é¡µ
 
- 6.×öºÃÈ«¾Ö²é¿´Ä£Ê½
+ 6.==åšå¥½å…¨å±€æŸ¥çœ‹æ¨¡å¼
 
- 7.Ä£°åÀ©Õ¹Ë¼Â·
+ 7.æ¨¡æ¿æ‰©å±•æ€è·¯
 
- 8.»­±Ê
+ 8.==ç”»ç¬”
 
- 9.ÎÄ×Ö×ÔÊÊÓ¦´óĞ¡
+ 9.æ–‡å­—è‡ªé€‚åº”å¤§å°
 
- 10.======¡· ¿ÉÊÓ»¯±à¼­
+ 10.======ã€‹ å¯è§†åŒ–ç¼–è¾‘
 
+*/
+
+/*
+2011/8/5  æ—¥å¿—è®°å½•
+
+1.åœ¨canvasç»˜åˆ¶æ—¶ï¼Œç§»åŠ¨é¼ æ ‡ï¼Œå›¾æ ‡å˜æˆç¬”çŠ¶
+
+2.æ–‡å­—çš„æ”¾å¤§ç¼©å°
+
+3.
 */
