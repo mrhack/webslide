@@ -17,23 +17,27 @@
 		<div>
 			<h1>webslide</h1>
 			<section>
-				<div>作者：MrHack</div>
-				<div>email：hdg1988@gmail.com</div>
+				<div>author: MrHack</div>
+				<div>email: hdg1988@gmail.com</div>
 			</section>
+			<footer>
+			</footer>
 		</div>
 		<div>
 			<h2>outline</h2>
 			<section>
 				<ol class="list">
-					<li class="outline">What is it?</li>
-					<li class="outline">How to use it?</li>
-					<li class="outline">What is the feature?</li>
-					<li class="outline">End</li>
+					<li>What is it?</li>
+					<li>What is the feature?</li>
+					<li>How to use it?</li>
+					<li>Thank you!</li>
 				</ol>
 			</section>
+			<footer>
+			</footer>
 			<style type="text/css">
 				.list li{
-					line-height:100px;
+					line-height:80px;
 				}
 			</style>
 		</div>
@@ -42,119 +46,78 @@
 			<section>
 				<ol class="list">
 					<li>A web application </li>
-					<li>Help people to share there ideas with others</li>
-					<li>Cross browser</li>
-					<li>Friendly with search engine</li>
+					<li>Help people make theri web slides easier</li>
+					<li>An web slide producer</li>
 				</ol>
 			</section>
 			<footer>
-				sina weibo : <a href="http://weibo.com/hdg1988">@MrHack</a>
-			</footer>
-		</div>
-		<div>
-			<h2>How to use it?</h1>
-			<section>
-				Create structure with HTML technology, then control the whole web page with javascript Object webslide.
-			</section>
-			<footer>
-				sina weibo : <a href="http://weibo.com/hdg1988">@MrHack</a>
 			</footer>
 		</div>
 		<div>
 			<h2>What is the feature</h1>
 			<section>
 				<ol class="list">
-					<li>Cross browser</li>
-					<li>Share with others every time and every where</li>
 					<li>Easy control</li>
-					<li>Animation and effects</li>
+					<li>Mark pencil</li>
+					<li>Outline show</li>
+					<li>There are many effects to be used</li>
+					<li>Friendly to search engine</li>
 				</ol>
 			</section>
 			<footer>
-				sina weibo : <a href="http://weibo.com/hdg1988">@MrHack</a>
 			</footer>
 		</div>
 		<div>
-			<h2>标题1</h1>
+			<h2>How to use it?(please press h to get more help)</h1>
 			<section>
-				<ol class="list">
-					<li>A web application </li>
-					<li>Help people to share there ideas with others</li>
-					<li>Cross browser</li>
-					<li>Friendly with search engine</li>
+				<ol>
+					<li>Use HTML and CSS to control the structure of slide. Create a wrap element, the children of the element are the slides of this application.</li>
+					<li>You can use further control width javascript.</li>
+					<li>There is an example:
+<pre style="font-size:20px;border:1px solid black;">
+<font face="Courier New">
+	<font color="#008000">// initialize an instance</font>
+	<font color="#0000ff">var </font><font color="#800000">slide = </font><font color="#0000ff">new </font><font color="#800000">WebSlide($(</font><font color="#ff00ff">'#webslide'</font><font color="#800000">));</font>
+	<font color="#008000">// set page leave action</font>
+	<font color="#800000">slide.pageLeaveAction = </font><font color="#ff00ff">"leaveFromCenterAndRotate"</font><font color="#800000">;</font>
+	<font color="#008000">// set page Step action</font>
+	<font color="#800000">slide.setPageStepActions(</font><font color="#ff00ff">"li"</font><font color="#800000">,{</font>
+		<font color="#800000">originStatus:{opacity:</font><font color="#800080">0</font><font color="#800000">},</font>
+		<font color="#800000">targetStatus:{opacity:</font><font color="#800080">1</font><font color="#800000">},</font>
+		<font color="#800000">time: </font><font color="#800080">2000</font>
+	<font color="#800000">});</font>
+</font>
+</pre>
+					</li>
 				</ol>
 			</section>
 			<footer>
-				sina weibo : <a href="http://weibo.com/hdg1988">@MrHack</a>
 			</footer>
 		</div>
 		<div>
-			<h2>标题1</h1>
-			<p>5555</p>
+			<h2>End</h1>
+			<section>
+				<div class="" style="height:300px;line-height:300px;text-align:center;font-size:100px;color:#cfe432;">
+					Thank you!!
+				</div>
+			</section>
+			<footer>
+			</footer>
 		</div>
 	</div>
 	
 	
 	<script language="javascript">
-	<!--
+		// initialize an instance
 		var slide = new WebSlide($('#webslide'));
-
-	
-		var pages = slide.pages;
-		/*
-		pages[1].addStep($("#title1")[0],{
-			position:"absolute",
-			top:0,
-			opacity:0
-		},{
-			top:"200px",
-			opacity:1
-		},500);
-
-		pages[1].addStep($("#title2")[0],{
-			position:"absolute",
-			top:0,
-			opacity:0
-		},{
-			top:"300px",
-			opacity:1
-		},500);
-
-		pages[1].addStep($("#title3")[0],{
-			position:"absolute",
-			top:0,
-			opacity:0
-		},{
-			top:"400px",
-			opacity:1
-		},500);
-		*/
-		pages[1].addStep($(".outline")[0],{
-			marginLeft:"-500px"
-		},{
-			marginLeft:"0"
-		},500);
-
-
-		pages[1].addStep($(".outline")[1],{
-			marginLeft:"-500px"
-		},{
-			marginLeft:"0"
-		},500);
-
-		pages[1].addStep($(".outline")[2],{
-			marginLeft:"-500px"
-		},{
-			marginLeft:"0"
-		},500);
-
-		pages[1].addStep($(".outline")[3],{
-			marginLeft:"-500px"
-		},{
-			marginLeft:"0"
-		},500);
-		
-	//-->
+		// set page leave action
+		slide.pageLeaveAction = "leaveFromCenter";
+		// set page Step action
+		slide.setPageStepActions("li",{
+			originStatus:{opacity:0},
+			targetStatus:{opacity:1},
+			time: 2000
+		});
 	</script>
  </body>
 </html>

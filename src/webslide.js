@@ -67,7 +67,7 @@
 		this.pages = [];
 		
 		this.status = false;
-		this.index = 0;
+		this.index = -1;
 
 		// get page width and height
 		var w = $(host);
@@ -75,24 +75,158 @@
 		this.pageHeight = w.height();
 		this.pageMargin = 40;
 		this.pageStartCss = {
+			zIndex: 0,
 			left: 0,
+			top:0,
 			right: 0,
 			margin: 0,
 			position: "absolute",
-			height: this.pageHeight + "px"
+			height: this.pageHeight + "px",
+			width: this.pageWidth + "px"
 		};
 		this.pageStopCss = {
 			margin: this.pageMargin + "px",
 			position:"relative",
-			height: this.pageHeight - this.pageMargin*2 + "px"
+			height: this.pageHeight - this.pageMargin*2 + "px",
+			width: this.pageWidth - this.pageMargin*2 + "px"
 		};
-
+		
+		// the two config set every page enter action and leave action. You can find this config 
+		// from Webslide.pageAction. 
+		this.pageLeaveAction = "";
+		this.pageEnterAction = "";
 		this.constructor.supclass.call(this);
 	};
+
+	// This object collect all action configs, just as jQuery easing plugin. So you can choose 
+	// config from this object's attribute or create your config and add it to this object. 
+	// This is to be a plugin for WebSlide. To distinguish from page enter action to page leave
+	// action , it is better to add "enter" or "leave" prefix . 
+	WebSlide.pageAction = {
+		"fromRight": function(){
+			return {
+				origin: {left: this.pageWidth + 100 + "px"},
+				target: {left: -this.pageWidth -100 + "px"},
+				time: 1000
+			}
+		},
+		// from right
+		"enterFromRight": function(){
+			return {
+				origin: {left: this.pageWidth + "px"},
+				time: 1000
+			}
+		},
+		"leaveFromLeft" : function(){
+			return {
+				target: {left: -this.pageWidth + "px"},
+				time: 1000
+			}
+		},
+		// from left
+		"enterFromLeft": function(){
+			return {
+				origin: {left: -this.pageWidth + "px"},
+				time: 1000
+			}
+		},
+		"leaveFromRight" : function(){
+			return {
+				target: {left: this.pageWidth + "px"},
+				time: 1000
+			}
+		},
+		// from top
+		"enterFromTop" : function(){
+			return {
+				origin: {top: -this.pageHeight + "px"},
+				time: 1000
+			}
+		},
+		"leaveFromTop": function(){
+			return {
+				target: {top: this.pageHeight + "px"},
+				time: 1000
+			}
+		},
+		// from bottom
+		"enterFromBottom" : function(){
+			return {
+				origin: {top: this.pageHeight + "px"},
+				time: 1000
+			}
+		},
+		"leaveFromBottom": function(){
+			return {
+				target: {top: -this.pageHeight + "px"},
+				time: 1000
+			}
+		},
+		
+		"leaveCss3Action": function(){
+			return {
+				target: {
+					"-webkit-transform-origin": "bottom left",
+					"-webkit-transform": "rotate(-90deg)",
+					"-webkit-transition-property": "-webkit-transform",
+					"-webkit-transition-duration":"1s"
+				},
+				css3: true,
+				time: 1000
+			}
+		},
+		"leaveFromCenter": function(){
+			return {
+				target: {
+					width:0 ,
+					height:0 ,
+					zIndex: 2000,
+					left: this.pageWidth/2 + "px",
+					top: this.pageHeight/2 + "px"
+				},
+				time: 1000
+			}
+		},
+		"leaveFromCenterAndRotate": function(){
+			return {
+				target: {
+					width:0 ,
+					height:0 ,
+					zIndex: 2000,
+					left: this.pageWidth/2 + "px",
+					top: this.pageHeight/2 + "px",
+					"-webkit-transform": "rotate(-270deg)",
+					"-webkit-transition-property": "-webkit-transform,width,height,left,top",
+					"-webkit-transition-duration":"1s"
+				},
+				css3: true,
+				time: 1000
+			}
+		},
+		"enterFromCenter": function(){
+			return {
+				origin:{
+					width:0 ,
+					height:0 ,
+					zIndex: 2000,
+					left: this.pageWidth/2 + "px",
+					top: this.pageHeight/2 + "px"
+				},
+				time:1000
+			}
+		},
+		"leaveAfterOneSecond": function(){
+			return {
+				target:{zIndex:0},
+				time: 1000
+			}
+		}
+	}
 	// every page has its own event
-	//
 	$.extendClass(WebSlide , $.Observable ,{
 		events:[
+			// 跳转到第几页面的事件
+			"gopage",
 			// 开始之前触事件
 			"beforestart",
 			// 开始之后触事件
@@ -108,6 +242,7 @@
 			var that = this;
 			// set origin style
 			this.wrap.css({
+				width: this.pageWidth + "px",
 				height: this.pageHeight + "px",
 				overflowY:"auto"
 			}).children().each(function(i,dom){
@@ -148,22 +283,15 @@
 						break; 
 				}
 			});
-
-			// when befor the ppt start , we need to resize pages
-			this.addListener("beforestart",function(slide){
-				slide.wrap.children().css(slide.pageStartCss);
-			});
-			// when after the ppt stop, we need to resize pages too.
-			this.addListener("afterend",function(slide){
-				// set scroll top value to avoid change
-				slide.wrap.children().css(slide.pageStopCss);
-				slide.wrap.scrollTop(slide.index * slide.pageHeight - slide.index*this.pageMargin);
-			});
-
+			
+			// judge if there is all right to go page num
+			this.addListener("gopage",function(slide,num){
+				
+			})
 			// for initialize for others
 			// e.g add info dom, tab dom ,here we init help board
 			this.addListener("initialize",function(slide){
-				var innerHTML = '<dl><dt>help</dt><dd><em>dblclick</em><span>to start slide show</span></dd><dd><em>mousewheel</em><span>to move around</span></dd><dd><em>→</em><em>↓</em><em>←</em><em>↑</em><span>to move around</span></dd><dd><em>Esc</em><span>to stop slide show</span></dd><dd><em>h</em><span>to toggle help board</span></dd></dl>';
+				var innerHTML = '<dl><dt>help</dt><dd><em>dblclick</em><span>to start slide show</span></dd><dd><em>mousewheel</em><span>to move around</span></dd><dd><em>→</em><em>↓</em><em>←</em><em>↑</em><span>to move around</span></dd><dd><em>Esc</em><span>to stop slide show</span></dd><dd><em>h</em><span>to toggle help board</span></dd><dd><em>c</em><span>to toggle control board</span></dd></dl>';
 				that.helpBoardClass = "webslide-help";
 				var board = that.helpBoard = $("<div></div>");
 				board.html(innerHTML).appendTo(document.body).addClass(that.helpBoardClass).height(that.pageHeight);
@@ -189,22 +317,47 @@
 			
 			// show control board
 			this.addListener("initialize",function(slide){
-				var innerHTML = '<dt></dt><dd class="p-left"></dd><dd class="p-pen"></dd><dd class="p-right"></dd>';
+				var innerHTML = '<dt></dt><dd class="p-left"></dd><dd class="p-pen"></dd><dd class="p-right"></dd><dd class="p-num"></dd>';
 				var board = that.controlBoard = $("<dl></dl>");
 				that.controlBoardClass = "webslide-control";
 				board.html(innerHTML).appendTo(document.body).addClass(that.controlBoardClass);
 				board.show = false;
 				
 				var orignBottom = 20;
+
+				// when go page , refresh page info
+				that.addListener("gopage",function(obj,num){
+					board.find(".p-num").html((num+1)+"/"+obj.pages.length);
+				});
 				$(document).keyup(function(event){
+					if(!that.status) return;
 					switch(event.keyCode){
-						case 67: //"c"	
+						case 67: //"c"
 							board.stop(true,false);
-							board.animate({bottom:board.show?"-100px":orignBottom+"px"},400,"swing");
+							// if no start do nothing
+							board.animate({bottom:board.show ?"-100px":orignBottom+"px"},400,"swing");
 							board.show = !board.show;
 							break;
 					}
 				});
+
+				// add listener for stop slide show , move out of controlBoard
+				that.addListener("afterend", function(){
+					board.stop(true,false);
+					board.animate({bottom:"-100px"},400,"swing");
+					if(that.drawCanvas){
+						that.drawCanvas.hide();
+					}
+				});
+				// add listener for stop slide show , move out of controlBoard
+				that.addListener("afterend", function(){
+					board.stop(true,false);
+					board.animate({bottom:"-100px"},400,"swing");
+					if(that.drawCanvas){
+						that.drawCanvas.hide();
+					}
+				});
+
 				// to left
 				board.find(".p-left").click(function(event){
 					that.prev();
@@ -246,9 +399,20 @@
 			// reset start and stop status
 			this.pageStartCss.height = this.pageHeight+"px";
 			this.pageStopCss.height = this.pageHeight - this.pageMargin*2 + "px";
-
+			
 			this.wrap.css({height:this.pageHeight+"px"}).children().css({
 				height: this[this.status?"pageStartCss":"pageStopCss"].height
+			});
+
+			// resize help board
+			this.helpBoard.css({height:this.pageHeight+"px"});
+		},
+		setPageStepActions: function(selector,animation){
+			$.each(this.pages,function(i,page){
+				page.obj.find(selector).each(function(i,dom){
+					animation.obj = dom;
+					page.addStep(animation);
+				});
 			});
 		},
 		/*
@@ -285,11 +449,14 @@
 		 * @parame index {Num} go to the current page index step
 		 */
 		goPage: function(num,index){
+			if(this.fireEvent("gopage",this,num) === false) return;
 			var lastpage = this.pages[this.index];
-			lastpage.end();
+			var currpage = this.pages[num];
+			if(lastpage && lastpage != currpage)
+				lastpage.leavePage();
 			this.index = num;
-			var currpage = this.pages[this.index];
-			currpage.start(index || -1);
+
+			currpage.enterPage(index || -1);
 		},
 
 		/*
@@ -310,6 +477,8 @@
 		start: function(num){
 			if(this.fireEvent("beforestart",this) === false) return;
 			this.status = true;
+			// set style resize page size
+			this.wrap.children().css(this.pageStartCss);
 			// hide all the pages
 			$.each(this.pages,function(i,page){
 				page.hide();
@@ -326,7 +495,6 @@
 		stop: function(){
 			if(this.fireEvent("beforeend",this) === false) return;
 			this.status = false;
-			
 			$.each(this.pages,function(i, page){
 				page.show();
 			});
@@ -336,12 +504,15 @@
 					step.setToTargetStatus();
 				});
 			});
-
+			// set scroll top value
+			this.wrap.children().css(this.pageStopCss);
+			this.wrap.scrollTop(this.index * this.pageHeight - this.index*this.pageMargin);
+			this.index = -1;
 			if(this.fireEvent("afterend",this) === false) return;
 		}
 	});
-	 
-		
+	
+	
 	/*
 	 * every step constructor of a page.
 	 * 
@@ -350,10 +521,12 @@
 		time = (+ new Date()),
 		Page = function(obj , webslide){
 			this.className = pagePrevClass+time,
-			this.dom = obj;
+			this.obj = $(obj);
 			this.webslide = webslide;
 			// current steps
 			this.stepIndex = -1;
+			this.leaveZIndex = 1000;
+			this.enterZIndex = 1001;
 			// save steps
 			this.steps = [];
 			this.objs = [];
@@ -363,33 +536,8 @@
 		
 	$.extendClass(Page , $.Observable ,{
 		initialize: function(){
-			var that = this;
 
-			$(this.dom).addClass(this.className).css({position:'relative'});
-			this.addListener("enterPage",function(page , index){
-				this.stepIndex = index;
-				console.log("enter page :" + that.webslide.index);
-				page.show();
-				//reset all the step
-				// set all these obj to target status
-				$.each(page.steps,function(i,steps){
-					// set orign status
-					if(i <= index){
-						$.each(steps,function(i,step){
-							//step.end();
-						});
-					}else{
-						$.each(steps,function(i,step){
-							step.reset();
-						});
-					}
-				});
-			});
-			// what would id do , when leave page
-			this.addListener("leavePage",function(page){
-				console.log("leave page :" + that.webslide.index);
-				page.hide();
-			});
+			this.obj.addClass(this.className);
 
 			this.addListener("pageStep",function(){
 				page.nextStep();
@@ -400,21 +548,19 @@
 		initEvent: function(){
 			var that = this;
 			// dbclick event to start to show ppt with current page
-			$(this.dom).dblclick(function(event){
+			this.obj.dblclick(function(event){
 				// get current page
 				var index = 0, 
 					pages = that.webslide.pages;
 				// if not started
 				if(that.webslide.status == false){
 					for (var i = 0; i < pages.length; i++){
-						if(pages[i].dom == this){
+						if(pages[i].obj[0] == this){
 							index = i;
 							break;
 						}
 					}
 					that.webslide.start(index);
-					// set before call start
-					//that.start();
 				}else{ // aready started
 					alert("aready started!");
 				}
@@ -429,14 +575,24 @@
 			"pageEnd",
 
 			/*
-			 * when enter a page
+			 * before enter a page
 			 */
-			"enterPage",
+			"beforeEnterPage",
 
 			/*
-			 * when leave a page
+			 * after enter a page
 			 */
-			"leavePage",
+			"afterEnterPage",
+
+			/*
+			 * before leave a page
+			 */
+			"beforeLeavePage",
+
+			/*
+			 * after leave a page
+			 */
+			"afterLeavePage",
 			
 			/*
 			 * when run the step of current page
@@ -452,16 +608,16 @@
 		addStep: function(index, obj/*HtmlElement*/, orign/*object*/ , target/*object*/ , time , easing , cb){
 			// send arguments as object
 			if($.isPlainObject(index)){
-				var o = index;
-				o.index = o.index || this.steps.length;
-				return this.addStep(o.index, o.obj, o.orignStatus, o.targetStatus, o.duration, o.easing, o.callback);
+				var o = index,
+					index = o.index || this.steps.length;
+				return this.addStep(index, o.obj, o.originStatus, o.targetStatus, o.duration, o.easing, o.callback);
 			}else if(typeof index == "object"){
 				return this.addStep(this.steps.length, index, obj, orign, target, time, easing);
 			}
 			var step = this.steps[index],
 				currStep = new Step({
 					obj: obj,
-					orignStatus: orign,
+					originStatus: orign,
 					targetStatus: target,
 					duration: time,
 					easing: easing,
@@ -539,27 +695,126 @@
 			});
 			return true;
 		},
-		start: function(index){
-			this.fireEvent("enterPage",this,index);
+		enterPage: function(index){
+			this.fireEvent("beforeEnterPage",this,index);
+			this.stepIndex = index;
+
+			//reset all the step
+			// set all these obj to target status
+			var tempArr = []; // if there has same dom to reset , keep every dom is reseted once
+			$.each(this.steps,function(i,steps){
+				// set orign status
+				if(i <= index){
+					$.each(steps,function(i,step){
+						//step.end();
+					});
+				}else{
+					$.each(steps,function(i,step){
+						if($.inArray(step.obj[0],tempArr)>=0){
+							return;
+						}
+						tempArr.push(step.obj[0]);
+						step.reset();
+					});
+				}
+			});
+			
+			var me = this , slideEnterActionConfig = WebSlide.pageAction[this.webslide.pageEnterAction],
+				config = (this.enterActionConfig || slideEnterActionConfig || this.defaultEnterActionConfig).call(this.webslide);
+
+			// if hide animation is not finished , you should to stop animation
+
+			this.show();
+			// css animation and normal animation
+			if(!config.css3){
+				this.obj.css({zIndex: config.origin.zIndex || this.enterZIndex}).css(config.origin || {})
+				.animate(this.webslide.pageStartCss , config.time || 0 , config.easing || "" , function(){
+					me.fireEvent("afterEnterPage",this);
+				});
+			}else{
+				//var duration = 
+				this.obj.css(config.origin || {});
+				setTimeout(function(){
+					me.obj[0].style.cssText = "";
+					me.obj.css(me.webslide.pageStartCss);
+				},config.time || 3000);
+			}
 		},
-		
-		end: function(){
-			// what can i do
-			this.fireEvent("leavePage",this);
+		stopCss3Animation: function(){
+			this.obj.css({
+				"-webkit-animation-play-state":"paused"
+			});
+		},
+		/*
+		 * set page to origin status, and set to target origin
+		 */
+		setEnterActionConfig: function(origin,time,easing){
+			this.enterActionConfig = function(){
+				return {
+					origin: origin,
+					time: time,
+					easing: easing
+				}
+			}
+		},
+		defaultEnterActionConfig: function(){
+			return {
+				origin: {},
+				time: 0
+			};
+		},
+		setLeaveActionConfig: function(target,time,easing){
+			this.leaveActionConfig = function(){
+				return {
+					target: target,
+					time: time,
+					easing: easing
+				}
+			}
+		},
+		defaultLeaveActionConfig: function(){
+			return {
+				target: {},
+				time: 0
+			};
+		},
+		leavePage: function(){
+			//this.setLeaveAction({left:-this.webslide.pageWidth+"px"},1000);
+			this.fireEvent("beforeLeavePage",this);
+
+			// get leave action config
+			var me = this, slideLeaveActionConfig = WebSlide.pageAction[this.webslide.pageLeaveAction],
+				// get page leave config
+				config = (this.leaveActionConfig || slideLeaveActionConfig || this.defaultLeaveActionConfig).call(this.webslide);
+
+			// set zIndex, some times we need to determine leave page and enter page which is top one.
+			// you can decide this by WebSlide.pageAction config.
+			this.obj.css({zIndex: config.target.zIndex || this.leaveZIndex});
+
+			// when use css3 to show animation. config must contain css3 attribute. we use this tag
+			// to design if use animation or css3 animation. Just as animation, css3 animation must
+			// contain time config. So we can set page to origin style after css3 animation.
+			if(!config.css3){
+				this.obj.animate(config.target || {},config.time || 0,config.easing || "",function(){
+					me.hide();
+					me.obj.css(me.webslide.pageStartCss);
+					me.fireEvent("afterLeavePage",this);
+				});
+			}else{// only set css only for css3, after css3 animation finished , set page style to origin
+				this.obj.css(config.target || {});
+				this._t = setTimeout(function(){
+					me.obj[0].style.cssText = "";
+					me.hide();
+					me.obj.css(me.webslide.pageStartCss);
+				},config.time || 3000);
+			}
 		},
 		hide: function(){
-			$(this.dom).hide();
-			// hide all the other objects of current page
-			$.each(this.objs,function(i,obj){
-				$(obj).hide();
-			});
+			this.obj.hide();
 		},
 		
 		show: function(){
-			$(this.dom).show();
-			$.each(this.objs,function(i,obj){
-				$(obj).show();
-			});
+			this.obj.show();
 		}
 	});
 	
@@ -579,8 +834,8 @@
 			}
 			
 			// this is all the orign status
-			this.orign = $.apply(this.orign,this.options.orignStatus,true);
-			this.target = $.apply(this.options.targetStatus,this.options.orignStatus,false);
+			this.orign = $.apply(this.orign,this.options.originStatus,true);
+			this.target = $.apply(this.options.targetStatus,this.options.originStatus,false);
 			// set obj to the target status
 			this.setToTargetStatus();
 		},
@@ -654,9 +909,15 @@
 /*
 2011/8/5  日志记录
 
-1.在canvas绘制时，移动鼠标，图标变成笔状
+#1.在canvas绘制时，移动鼠标，图标变成笔状 fixed
 
 2.文字的放大缩小
 
-3.
+*/
+
+/*
+2011/8/7 日志记录
+
+1.在进入页面和离开页面时使用动画 如果同时使用enter和leave动画 有可能出现问题， 元素直接被display:none 不显示了
+
 */
