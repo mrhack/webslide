@@ -64,6 +64,7 @@ footer{
  .webslide-help{
 	font-size:16px;
 	position:absolute;
+	z-index:9999997;
 	left:-350px;
 	top:0px;
 	background:black;
