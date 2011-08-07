@@ -403,7 +403,7 @@
 			this.pageStopCss.height = this.pageHeight - this.pageMargin*2 + "px";
 			this.pageStopCss.width = this.pageWidth- this.pageMargin*2 +"px";
 
-			this.wrap.css({height:this.pageHeight+"px"}).children().css({
+			this.wrap.css({height:this.pageHeight+"px",width:this.pageWidth + "px"}).children().css({
 				height: this[this.status?"pageStartCss":"pageStopCss"].height,
 				width: this[this.status?"pageStartCss":"pageStopCss"].width,
 			});
