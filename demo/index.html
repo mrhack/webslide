@@ -13,6 +13,28 @@
 
  </head>
  <body>
+	<div id="setting" style="background:black;font-size:20px;">
+		set page enter action<select name="" id="page_enter_action">
+			<option></option>
+			<option>fromRight</option>
+			<option>enterFromRight</option>
+			<option>enterFromLeft</option>
+			<option>enterFromTop</option>
+			<option>enterFromBottom</option>
+			<option>enterFromCenter</option>
+		</select>
+		set page leave action<select name="" id="page_leave_action">
+			<option></option>
+			<option>fromRight</option>
+			<option>leaveFromLeft</option>
+			<option>leaveFromRight</option>
+			<option>leaveFromTop</option>
+			<option>leaveFromBottom</option>
+			<option>leaveCss3Action</option>
+			<option>leaveFromCenter</option>
+			<option>leaveFromCenterAndRotate</option>
+		</select>&nbsp;&nbsp;&nbsp;&nbsp;<span> double click page to start slide show</span>
+	</div>
 	<div class="webslide" id="webslide">
 		<div>
 			<h1>webslide</h1>
@@ -32,7 +54,6 @@
 					<li>What is it?</li>
 					<li>What is the feature?</li>
 					<li>How to use it?</li>
-					<li>Thank you!</li>
 				</ol>
 			</section>
 			<footer>
@@ -48,8 +69,7 @@
 			<section>
 				<ol class="list">
 					<li>A web application </li>
-					<li>Help people make their web slides easier</li>
-					<li>An web slide producer</li>
+					<li>A web slide producer,which helps people make their web slides easier</li>
 				</ol>
 			</section>
 			<footer>
@@ -62,7 +82,7 @@
 					<li>Easy control</li>
 					<li>Mark pencil</li>
 					<li>Outline show</li>
-					<li>There are many effects to be used</li>
+					<li>Many effects</li>
 					<li>Friendly to search engine</li>
 				</ol>
 			</section>
@@ -74,9 +94,9 @@
 			<section>
 				<ol>
 					<li>Use HTML and CSS to control the structure of slide. Create a wrap element, the children of the element are the slides of this application.</li>
-					<li>You can use further control width javascript.</li>
-					<li>There is an example:
-<pre style="font-size:20px;border:1px solid black;">
+					<li>You can do further control width javascript.</li>
+					<li>Here is an example:
+<pre style="font-size:20px;border:1px solid black;background:white;">
 <font face="Courier New">
 	<font color="#008000">// initialize an instance</font>
 	<font color="#0000ff">var </font><font color="#800000">slide = </font><font color="#0000ff">new </font><font color="#800000">WebSlide($(</font><font color="#ff00ff">'#webslide'</font><font color="#800000">));</font>
@@ -97,10 +117,10 @@
 			</footer>
 		</div>
 		<div>
-			<h2>End</h1>
+			<h2>Slide End</h1>
 			<section>
 				<div class="" style="height:300px;line-height:300px;text-align:center;font-size:100px;color:#cfe432;">
-					Thank you!!
+					Q & A
 				</div>
 			</section>
 			<footer>
@@ -119,6 +139,17 @@
 			originStatus:{opacity:0},
 			targetStatus:{opacity:1},
 			time: 2000
+		});
+
+		slide.addListener("beforestart",function(){
+			var enterAction = $("#setting select").eq(0).val();
+			var leaveAction = $("#setting select").eq(1).val();
+			slide.pageLeaveAction = leaveAction;
+			slide.pageEnterAction = enterAction;
+			$("#setting").hide();
+		});
+		slide.addListener("afterstop",function(){
+			$("#setting").show();
 		});
 	</script>
  </body>

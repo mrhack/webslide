@@ -342,7 +342,7 @@
 				});
 
 				// add listener for stop slide show , move out of controlBoard
-				that.addListener("afterend", function(){
+				that.addListener("afterstop", function(){
 					board.stop(true,false);
 					board.animate({bottom:"-100px"},400,"swing");
 					if(that.drawCanvas){
@@ -350,7 +350,7 @@
 					}
 				});
 				// add listener for stop slide show , move out of controlBoard
-				that.addListener("afterend", function(){
+				that.addListener("afterstop", function(){
 					board.stop(true,false);
 					board.animate({bottom:"-100px"},400,"swing");
 					if(that.drawCanvas){
@@ -497,7 +497,7 @@
 		 * to top, we need to set the scroll top value.
 		 */
 		stop: function(){
-			if(this.fireEvent("beforeend",this) === false) return;
+			if(this.fireEvent("beforestop",this) === false) return;
 			this.status = false;
 			$.each(this.pages,function(i, page){
 				page.show();
@@ -512,7 +512,7 @@
 			this.wrap.children().css(this.pageStopCss);
 			this.wrap.scrollTop(this.index * this.pageHeight - this.index*this.pageMargin);
 			this.index = -1;
-			if(this.fireEvent("afterend",this) === false) return;
+			if(this.fireEvent("afterstop",this) === false) return;
 		}
 	});
 	
