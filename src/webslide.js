@@ -398,10 +398,14 @@
 			this.pageWidth = $(window).width();
 			// reset start and stop status
 			this.pageStartCss.height = this.pageHeight+"px";
+			this.pageStartCss.width = this.pageWidth+"px";
+
 			this.pageStopCss.height = this.pageHeight - this.pageMargin*2 + "px";
-			
+			this.pageStopCss.width = this.pageWidth- this.pageMargin*2 +"px";
+
 			this.wrap.css({height:this.pageHeight+"px"}).children().css({
-				height: this[this.status?"pageStartCss":"pageStopCss"].height
+				height: this[this.status?"pageStartCss":"pageStopCss"].height,
+				width: this[this.status?"pageStartCss":"pageStopCss"].width,
 			});
 
 			// resize help board
