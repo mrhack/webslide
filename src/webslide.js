@@ -291,7 +291,7 @@
 			// for initialize for others
 			// e.g add info dom, tab dom ,here we init help board
 			this.addListener("initialize",function(slide){
-				var innerHTML = '<dl><dt>help</dt><dd><em>dblclick</em><span>to start slide show</span></dd><dd><em>mousewheel</em><span>to move around</span></dd><dd><em>→</em><em>↓</em><em>←</em><em>↑</em><span>to move around</span></dd><dd><em>Esc</em><span>to stop slide show</span></dd><dd><em>h</em><span>to toggle help board</span></dd><dd><em>c</em><span>to toggle control board</span></dd></dl>';
+				var innerHTML = '<dl><dt>help</dt><dd><em>dblclick</em><span>to start slide show</span></dd><dd><em>mousewheel</em><span>to move around</span></dd><dd><em>right click</em><span>to hide sketchpad</span></dd><dd><em>→</em><em>↓</em><em>←</em><em>↑</em><span>to move around</span></dd><dd><em>Esc</em><span>to stop slide show</span></dd><dd><em>h</em><span>to toggle help board</span></dd><dd><em>c</em><span>to toggle control board</span></dd></dl>';
 				that.helpBoardClass = "webslide-help";
 				var board = that.helpBoard = $("<div></div>");
 				board.html(innerHTML).appendTo(document.body).addClass(that.helpBoardClass).height(that.pageHeight);

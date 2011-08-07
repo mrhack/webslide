@@ -19,8 +19,10 @@
 			<section>
 				<div>author: MrHack</div>
 				<div>email: hdg1988@gmail.com</div>
+				<div>github: https://github.com/mrhack/webslide</div>
 			</section>
 			<footer>
+				tip: double click to start slide
 			</footer>
 		</div>
 		<div>
@@ -46,7 +48,7 @@
 			<section>
 				<ol class="list">
 					<li>A web application </li>
-					<li>Help people make theri web slides easier</li>
+					<li>Help people make their web slides easier</li>
 					<li>An web slide producer</li>
 				</ol>
 			</section>
@@ -111,7 +113,7 @@
 		// initialize an instance
 		var slide = new WebSlide($('#webslide'));
 		// set page leave action
-		slide.pageLeaveAction = "leaveFromCenter";
+		slide.pageLeaveAction = "leaveFromCenterAndRotate";
 		// set page Step action
 		slide.setPageStepActions("li",{
 			originStatus:{opacity:0},
