@@ -1,20 +1,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
  <head>
-  <title>webslide</title>
+  <title>web幻灯片</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <link href="../style/default.css" rel="stylesheet" type="text/css" />
   <script language="javascript" src="../lib/jquery-1.6.2.js" type="text/javascript"></script>
 
-  <script language="javascript" src="../src/debugger.js" type="text/javascript"></script>
-  <script language="javascript" src="../src/extend.js" type="text/javascript"></script>
-  <script language="javascript" src="../src/Observable.js" type="text/javascript"></script>
+  <script language="javascript" src="../src/jquery.extend.js" type="text/javascript"></script>
+
   <script language="javascript" src="../src/webslide.js" type="text/javascript"></script>
+  <script language="javascript" src="../src/webslide.plugin.action.js" type="text/javascript"></script>
 
  </head>
  <body>
 	<div id="setting" style="background:black;font-size:20px;">
-		set page enter action<select name="" id="page_enter_action">
+		设置页面进入动画<select name="" id="page_enter_action">
 			<option></option>
 			<option>fromRight</option>
 			<option>enterFromRight</option>
@@ -23,7 +23,7 @@
 			<option>enterFromBottom</option>
 			<option>enterFromCenter</option>
 		</select>
-		set page leave action<select name="" id="page_leave_action">
+		设置页面退出动画<select name="" id="page_leave_action">
 			<option></option>
 			<option>fromRight</option>
 			<option>leaveFromLeft</option>
@@ -33,7 +33,7 @@
 			<option>leaveCss3Action</option>
 			<option>leaveFromCenter</option>
 			<option>leaveFromCenterAndRotate</option>
-		</select>&nbsp;&nbsp;&nbsp;&nbsp;<span> double click page to start slide show</span>
+		</select>&nbsp;&nbsp;&nbsp;&nbsp;<span> 按h键获得帮助</span> (chrome浏览器效果最佳)
 	</div>
 	<div class="webslide" id="webslide">
 		<div>
@@ -44,16 +44,16 @@
 				<div>github: https://github.com/mrhack/webslide</div>
 			</section>
 			<footer>
-				tip: double click to start slide
+				提示：双击 页面进行幻灯片的放映
 			</footer>
 		</div>
 		<div>
 			<h2>outline</h2>
 			<section>
 				<ol class="list">
-					<li>What is it?</li>
-					<li>What is the feature?</li>
-					<li>How to use it?</li>
+					<li>webslide是什么?</li>
+					<li>有什么特点?</li>
+					<li>如何使用它?</li>
 				</ol>
 			</section>
 			<footer>
@@ -65,44 +65,44 @@
 			</style>
 		</div>
 		<div>
-			<h2>What is it?</h1>
+			<h2>webslide是什么?</h2>
 			<section>
 				<ol class="list">
-					<li>A web application </li>
-					<li>A web slide producer,which helps people make their web slides easier</li>
+					<li>网络幻灯片的生成器，其目的主要是简单化网络幻灯片的制作过程。</li>
+					<li>该应用内置多种页面切换特效可以使作品更多绚丽多彩。同时由于其高扩展性，用户可以根据自己的需求去定制特效。</li>
 				</ol>
 			</section>
 			<footer>
 			</footer>
 		</div>
 		<div>
-			<h2>What is the feature</h1>
+			<h2>webslide有什么特点？</h2>
 			<section>
 				<ol class="list">
-					<li>Easy control</li>
-					<li>Mark pencil</li>
-					<li>Outline show</li>
-					<li>Many effects</li>
-					<li>Friendly to search engine</li>
+					<li>控制简单</li>
+					<li>较高扩展性</li>
+					<li>自由定制</li>
+					<li>对搜索引擎友好</li>
 				</ol>
 			</section>
 			<footer>
 			</footer>
 		</div>
 		<div>
-			<h2>How to use it?(please press h to get more help)</h1>
+			<h2>如何使用?</h2>
 			<section>
 				<ol>
-					<li>Use HTML and CSS to control the structure of slide. Create a wrap element, the children of the element are the slides of this application.</li>
-					<li>You can do further control width javascript.</li>
-					<li>Here is an example:
+					<li>创建一个元素，当作整个幻灯片的容器</li>
+					<li>在这个容器下每一个直接子元素就是一张幻灯片，构造好子元素，使用css来控制子元素的显示</li>
+					<li>用js来实现幻灯片整个过程的控制</li>
+					<li>这个有简单的例子:
 <pre style="font-size:20px;border:1px solid black;background:white;">
 <font face="Courier New">
-	<font color="#008000">// initialize an instance</font>
+	<font color="#008000">// new 一个实例</font>
 	<font color="#0000ff">var </font><font color="#800000">slide = </font><font color="#0000ff">new </font><font color="#800000">WebSlide($(</font><font color="#ff00ff">'#webslide'</font><font color="#800000">));</font>
-	<font color="#008000">// set page leave action</font>
+	<font color="#008000">// 设置页面的切换特效</font>
 	<font color="#800000">slide.pageLeaveAction = </font><font color="#ff00ff">"leaveFromCenterAndRotate"</font><font color="#800000">;</font>
-	<font color="#008000">// set page Step action</font>
+	<font color="#008000">// 设置页面中每一小动画的特效</font>
 	<font color="#800000">slide.setPageStepActions(</font><font color="#ff00ff">"li"</font><font color="#800000">,{</font>
 		<font color="#800000">originStatus:{opacity:</font><font color="#800080">0</font><font color="#800000">},</font>
 		<font color="#800000">targetStatus:{opacity:</font><font color="#800080">1</font><font color="#800000">},</font>
